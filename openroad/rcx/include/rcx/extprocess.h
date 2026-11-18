@@ -13,6 +13,7 @@ namespace rcx {
 
 class extProcess;
 class Parser;
+struct Pex25dPattern;
 
 class extConductor
 {
@@ -132,7 +133,8 @@ class extMasterConductor
                    double width,
                    double length,
                    double height_offset,
-                   double volt);
+                   double volt,
+                   Pex25dPattern* rec = nullptr);
   void writePointXY(FILE* fp,
                     const char* suffix,
                     double X,

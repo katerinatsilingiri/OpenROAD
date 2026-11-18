@@ -10,6 +10,7 @@
 
 #include "parse.h"
 #include "rcx/array1.h"
+#include "rcx/extPex25dWriter.h"
 #include "utl/Logger.h"
 
 namespace rcx {
@@ -1440,8 +1441,20 @@ void extMasterConductor::writeWire3D(FILE* fp,
                                      double width,
                                      double length,
                                      double height_offset,
-                                     double volt)
+                                     double volt,
+                                     Pex25dPattern* rec)
 {
+  if (rec != nullptr) {
+    rec->addWire(_condId,
+                 wireNum,
+                 X,
+                 X + width,
+                 _loLeft[2] - height_offset,
+                 _hiLeft[2] - height_offset,
+                 length,
+                 volt > 0.0);
+  }
+
   if (fp == nullptr) {
     return;
   }

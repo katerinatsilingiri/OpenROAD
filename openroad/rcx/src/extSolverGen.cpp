@@ -41,6 +41,15 @@ uint32_t extSolverGen::genSolverPatterns(const char* process_name,
                   "-pex25d is ignored.");
     _writePex25d = false;
   }
+
+  if (_writePex25d && wire_cnt >= 5) {
+    logger_->warn(
+        utl::RCX,
+        543,
+        "PEX25D output supports -wire_cnt up to 4, -pex25d is ignored.");
+    _writePex25d = false;
+  }
+
   if (!_writeUf && !_writePex25d) {
     logger_->warn(
         utl::RCX, 539, "No output format selected, no patterns are generated.");
@@ -568,25 +577,34 @@ double extSolverGen::writeWirePatterns(FILE* fp,
     min_x = std::min(min_x, xd[ii]);
   }
   for (int ii = 2; ii > 0; ii--) {
-    m->writeWire3D(fp, cnt++, xd[ii], minWidth, len, height_offset, 0.0);
+    m->writeWire3D(
+        fp, cnt++, xd[ii], minWidth, len, height_offset, 0.0, _pexRec);
     max_x = xd[ii] + minWidth;
   }
   min_x = std::min(min_x, x);
 
-  m->writeWire3D(
-      fp, cnt++, x, targetWidth, len, height_offset, 1.0);  // Wire on focus
+  m->writeWire3D(fp,
+                 cnt++,
+                 x,
+                 targetWidth,
+                 len,
+                 height_offset,
+                 1.0,
+                 _pexRec);  // Wire on focus
   double center_diag_x = x;
   max_x = x + targetWidth;
 
   double xu[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   xu[0] = x + targetPitch;  // next neighbor spacing
-  m->writeWire3D(fp, cnt++, xu[0], targetWidth, len, height_offset, 0.0);
+  m->writeWire3D(
+      fp, cnt++, xu[0], targetWidth, len, height_offset, 0.0, _pexRec);
   xu[1] += xu[0] + targetWidth + minSpace;
   for (int ii = 2; ii < n; ii++) {
     xu[ii] = xu[ii - 1] + min_pitch;  // context: next over neighbor spacing
   }
   for (int ii = 1; ii < n; ii++) {
-    m->writeWire3D(fp, cnt++, xu[ii], minWidth, len, height_offset, 0.0);
+    m->writeWire3D(
+        fp, cnt++, xu[ii], minWidth, len, height_offset, 0.0, _pexRec);
     max_x = xu[ii] + minWidth;
   }
   if (_diagModel > 0) {
@@ -597,15 +615,22 @@ double extSolverGen::writeWirePatterns(FILE* fp,
     if (fp != nullptr) {
       fprintf(fp, "\n");
     }
-    mOver->writeWire3D(
-        fp, cnt++, center_diag_x, minWidthDiag, len, height_offset, 0.0);
+    mOver->writeWire3D(fp,
+                       cnt++,
+                       center_diag_x,
+                       minWidthDiag,
+                       len,
+                       height_offset,
+                       0.0,
+                       _pexRec);
     mOver->writeWire3D(fp,
                        cnt++,
                        center_diag_x + minWidthDiag + minSpaceDiag,
                        minWidthDiag,
                        len,
                        height_offset,
-                       0.0);
+                       0.0,
+                       _pexRec);
   }
   return min_x;
 }
@@ -649,15 +674,28 @@ double extSolverGen::writeWirePatterns_w3(FILE* fp,
   double X1 = x + targetPitch;  // next neighbor
   uint32_t cnt = 1;
   if (_wireCnt == 3) {
-    m->writeWire3D(fp, cnt++, X0, targetWidth, len, height_offset, 0);
-    m->writeWire3D(
-        fp, cnt++, x, targetWidth, len, height_offset, 1.0);  // Wire on focues
-    m->writeWire3D(fp, cnt++, X1, targetWidth, len, height_offset, 0);
+    m->writeWire3D(fp, cnt++, X0, targetWidth, len, height_offset, 0, _pexRec);
+    m->writeWire3D(fp,
+                   cnt++,
+                   x,
+                   targetWidth,
+                   len,
+                   height_offset,
+                   1.0,
+                   _pexRec);  // Wire on focues
+    m->writeWire3D(fp, cnt++, X1, targetWidth, len, height_offset, 0, _pexRec);
   } else {
-    m->writeWire3D(
-        fp, cnt++, x, targetWidth, len, height_offset, 1.0);  // Wire on focues
+    m->writeWire3D(fp,
+                   cnt++,
+                   x,
+                   targetWidth,
+                   len,
+                   height_offset,
+                   1.0,
+                   _pexRec);  // Wire on focues
     if (_wireCnt > 1) {
-      m->writeWire3D(fp, cnt++, X1, targetWidth, len, height_offset, 0);
+      m->writeWire3D(
+          fp, cnt++, X1, targetWidth, len, height_offset, 0, _pexRec);
     }
   }
   double min_x = X0;
@@ -673,15 +711,22 @@ double extSolverGen::writeWirePatterns_w3(FILE* fp,
       fprintf(fp, "\n");
     }
 
-    mOver->writeWire3D(
-        fp, cnt++, center_diag_x, minWidthDiag, len, height_offset, 0.0);
+    mOver->writeWire3D(fp,
+                       cnt++,
+                       center_diag_x,
+                       minWidthDiag,
+                       len,
+                       height_offset,
+                       0.0,
+                       _pexRec);
     mOver->writeWire3D(fp,
                        cnt++,
                        center_diag_x + minWidthDiag + minSpaceDiag,
                        minWidthDiag,
                        len,
                        height_offset,
-                       0.0);
+                       0.0,
+                       _pexRec);
   }
   return min_x;
 }
