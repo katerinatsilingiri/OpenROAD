@@ -74,12 +74,14 @@ sta::define_cmd_args "gen_solver_patterns" {
     [-s_list spacings]
     [-over_dist dist]
     [-under_dist dist]
+    [-uf]
+    [-pex25d]
 }
 
 proc gen_solver_patterns { args } {
   sta::parse_key_args "gen_solver_patterns" args \
     keys {-process_file -process_name -version -wire_cnt -len -w_list \
-        -s_list -over_dist -under_dist } flags { }
+        -s_list -over_dist -under_dist } flags { -uf -pex25d }
 
   set process_file "MINTYPMAX"
   if { [info exists keys(-process_file)] } {
@@ -119,6 +121,12 @@ proc gen_solver_patterns { args } {
     set under_dist $keys(-under_dist)
   }
 
+  set uf [info exists flags(-uf)]
+  set pex25d [info exists flags(-pex25d)]
+  if { !$uf && !$pex25d } {
+    set uf 1
+  }
+
   rcx::gen_solver_patterns $process_file $process_name $version $cnt $len \
-    $over_dist $under_dist $w_list $s_list
+    $over_dist $under_dist $w_list $s_list $uf $pex25d
 }

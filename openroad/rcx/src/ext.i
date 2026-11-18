@@ -383,11 +383,11 @@ write_rcx_model(const char* filename)
   ext->write_rcx_model(filename);
 }
 // ------------------------------- dkf 09252024 -------------------------------
-void gen_solver_patterns(const char *process_file, const char * process_name, int version, int wire_cnt, int len, int over_dist, int under_dist, const char* w_list, const char* s_list)
+void gen_solver_patterns(const char *process_file, const char * process_name, int version, int wire_cnt, int len, int over_dist, int under_dist, const char* w_list, const char* s_list, bool uf, bool pex25d)
 {
   Ext* ext = getOpenRCX();
 
-  ext->gen_solver_patterns(process_file, process_name, version, wire_cnt, len, over_dist, under_dist, w_list, s_list);
+  ext->gen_solver_patterns(process_file, process_name, version, wire_cnt, len, over_dist, under_dist, w_list, s_list, uf, pex25d);
 
 }
 %} // inline

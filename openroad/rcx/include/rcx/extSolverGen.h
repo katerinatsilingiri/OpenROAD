@@ -144,6 +144,8 @@ class extSolverGen : public extProcess
   FILE* _dbg_logFP;
 
   bool _writeFiles;
+  bool _writeUf;
+  bool _writePex25d;
 
   bool _readCapLog;
   char _commentLine[10000];
@@ -164,7 +166,9 @@ class extSolverGen : public extProcess
                              int over_dist,
                              int under_dist,
                              const char* w_list,
-                             const char* s_list);
+                             const char* s_list,
+                             bool uf,
+                             bool pex25d);
   static int getLastCharInt(const char* name);
 };
 

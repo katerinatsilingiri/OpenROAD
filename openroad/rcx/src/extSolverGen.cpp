@@ -27,8 +27,25 @@ uint32_t extSolverGen::genSolverPatterns(const char* process_name,
                                          int over_dist,
                                          int under_dist,
                                          const char* w_list,
-                                         const char* s_list)
+                                         const char* s_list,
+                                         bool uf,
+                                         bool pex25d)
 {
+  _writeUf = uf;
+  _writePex25d = pex25d;
+  if (_writePex25d && version < 2) {
+    logger_->warn(utl::RCX,
+                  538,
+                  "PEX25D output requires -version 2 or higher, "
+                  "-pex25d is ignored.");
+    _writePex25d = false;
+  }
+  if (!_writeUf && !_writePex25d) {
+    logger_->warn(
+        utl::RCX, 539, "No output format selected, no patterns are generated.");
+    return 0;
+  }
+
   if (!setWidthSpaceMultipliers(w_list, s_list)) {
     logger_->warn(utl::RCX,
                   235,
@@ -71,6 +88,10 @@ void extSolverGen::init()
   _wireFileName = new char[1024];
   _capLogFP = nullptr;
   _logFP = nullptr;
+
+  _writeUf
+      = true;  // default to true, can be set to false in gen_solver_patterns
+  _writePex25d = false;
 
   _readCapLog = false;
   _commentFlag = false;
@@ -398,7 +419,7 @@ bool extSolverGen::measurePatternVar_3D(int met,
 
   FILE* wfp = mkPatternFile();
 
-  if (wfp == nullptr) {
+  if (_writeUf && wfp == nullptr) {
     return false;  // should be an exception!! and return!
   }
 
@@ -446,7 +467,7 @@ bool extSolverGen::measurePatternVar_3D(int met,
     height_low = 0;
   }
 
-  if (_commentFlag) {
+  if (_commentFlag && wfp != nullptr) {
     fprintf(wfp, "%s\n", _commentLine);
   }
 
@@ -459,26 +480,29 @@ bool extSolverGen::measurePatternVar_3D(int met,
     X0 = writeWirePatterns_w3(wfp, height_low, len1, X1);
   }
 
-  fprintf(wfp,
-          "\nWINDOW_BBOX  LL %6.3f %6.3f UR %6.3f %6.3f LENGTH %6.3f\n",
-          X0,
-          0.0,
-          X1,
-          height_ceiling,
-          len1);
-  double DX = X1 - X0;
-  fprintf(wfp,
-          "\nSIM_WIN_EXT  LL %6.3f %6.3f UR %6.3f %6.3f LENGTH %6.3f %6.3f\n",
-          -DX,
-          0.0,
-          DX,
-          0.0,
-          0.0,
-          len1);
+  if (wfp != nullptr) {
+    fprintf(wfp,
+            "\nWINDOW_BBOX  LL %6.3f %6.3f UR %6.3f %6.3f LENGTH %6.3f\n",
+            X0,
+            0.0,
+            X1,
+            height_ceiling,
+            len1);
+    double DX = X1 - X0;
+    fprintf(wfp,
+            "\nSIM_WIN_EXT  LL %6.3f %6.3f UR %6.3f %6.3f LENGTH %6.3f %6.3f\n",
+            -DX,
+            0.0,
+            DX,
+            0.0,
+            0.0,
+            len1);
 
-  fprintf(_filesFP, "%s/wires\n", _wireDirName);
+    fprintf(_filesFP, "%s/wires\n", _wireDirName);
 
-  fclose(wfp);
+    fclose(wfp);
+  }
+
   return true;
 }
 double extSolverGen::writeWirePatterns(FILE* fp,
@@ -552,7 +576,9 @@ double extSolverGen::writeWirePatterns(FILE* fp,
     double minWidthDiag = getConductor(_overMet)->_min_width;
     double minSpaceDiag = getConductor(_overMet)->_min_spacing;
 
-    fprintf(fp, "\n");
+    if (fp != nullptr) {
+      fprintf(fp, "\n");
+    }
     mOver->writeWire3D(
         fp, cnt++, center_diag_x, minWidthDiag, len, height_offset, 0.0);
     mOver->writeWire3D(fp,
@@ -625,7 +651,10 @@ double extSolverGen::writeWirePatterns_w3(FILE* fp,
     double minWidthDiag = getConductor(_overMet)->_min_width;
     double minSpaceDiag = getConductor(_overMet)->_min_spacing;
 
-    fprintf(fp, "\n");
+    if (fp != nullptr) {
+      fprintf(fp, "\n");
+    }
+
     mOver->writeWire3D(
         fp, cnt++, center_diag_x, minWidthDiag, len, height_offset, 0.0);
     mOver->writeWire3D(fp,
@@ -731,6 +760,10 @@ FILE* extSolverGen::openFile(const char* topDir,
 FILE* extSolverGen::mkPatternFile()
 {
   _parser->mkDirTree(_wireDirName, "/");
+
+  if (!_writeUf) {
+    return nullptr;
+  }
 
   FILE* fp = openFile(_wireDirName, _wireFileName, nullptr, "w");
   if (fp == nullptr) {

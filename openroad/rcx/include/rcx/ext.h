@@ -52,7 +52,9 @@ class Ext
                            int over_dist,
                            int under_dist,
                            const char* w_list,
-                           const char* s_list);
+                           const char* s_list,
+                           bool uf,
+                           bool pex25d);
 
   // ---------------------------- dkf 092024 ---------------------------------
   bool init_rcx_model(const char* corner_names, int metal_cnt);

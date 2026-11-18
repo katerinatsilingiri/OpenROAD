@@ -68,7 +68,9 @@ bool Ext::gen_solver_patterns(const char* process_file,
                               int over_dist,
                               int under_dist,
                               const char* w_list,
-                              const char* s_list)
+                              const char* s_list,
+                              bool uf,
+                              bool pex25d)
 {
   extSolverGen* p = new extSolverGen(64, 128, logger_);
 
@@ -83,7 +85,9 @@ bool Ext::gen_solver_patterns(const char* process_file,
                        over_dist,
                        under_dist,
                        w_list,
-                       s_list);
+                       s_list,
+                       uf,
+                       pex25d);
 
   return true;
 }

@@ -945,22 +945,26 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
       double h1 = getConductor(underMet)->_height;
       double th1 = getConductor(underMet)->_thickness;
       height_base = h1 + th1;
-      fprintf(wfp,
-              "GROUND_PLANE %d M%d_w%d HEIGHT %6.3f %6.3f  THICKNESS %6.3f\n",
-              underMet,
-              underMet,
-              underMet,
-              -th1,
-              0.0,
-              th1);
+      if (wfp != nullptr) {
+        fprintf(wfp,
+                "GROUND_PLANE %d M%d_w%d HEIGHT %6.3f %6.3f  THICKNESS %6.3f\n",
+                underMet,
+                underMet,
+                underMet,
+                -th1,
+                0.0,
+                th1);
+      }
     } else {
       a->writeGround(wfp, underMet, 0, th);
     }
   } else {
-    if (apply_height_offset) {
-      fprintf(wfp, "GROUND_PLANE 0 M0_w0  HEIGHT -0.1 0.0  THICKNESS 0.1\n");
-    } else {
-      fprintf(wfp, "GROUND_PLANE 0 M0_w0  HEIGHT 0.0 0.0  THICKNESS 0.0\n");
+    if (wfp != nullptr) {
+      if (apply_height_offset) {
+        fprintf(wfp, "GROUND_PLANE 0 M0_w0  HEIGHT -0.1 0.0  THICKNESS 0.1\n");
+      } else {
+        fprintf(wfp, "GROUND_PLANE 0 M0_w0  HEIGHT 0.0 0.0  THICKNESS 0.0\n");
+      }
     }
   }
   if (overMet > 0) {
@@ -972,20 +976,23 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
     extMasterConductor* a = getMasterConductor(overMet);
     if (apply_height_offset) {
       height_ceiling = getConductor(overMet)->_height;
-
-      fprintf(wfp,
-              "GROUND_PLANE %d M%d_w%d HEIGHT %6.3f %6.3f  THICKNESS %6.3f\n",
-              overMet,
-              overMet,
-              overMet,
-              h2 - height_base,
-              h2 + th - height_base,
-              th);
+      if (wfp != nullptr) {
+        fprintf(wfp,
+                "GROUND_PLANE %d M%d_w%d HEIGHT %6.3f %6.3f  THICKNESS %6.3f\n",
+                overMet,
+                overMet,
+                overMet,
+                h2 - height_base,
+                h2 + th - height_base,
+                th);
+      }
     } else {
       a->writeGround(wfp, overMet, 0, th);
     }
   }
-  fprintf(wfp, "\n# Process Stack -- Dielectric Heights\n");
+  if (wfp != nullptr) {
+    fprintf(wfp, "\n# Process Stack -- Dielectric Heights\n");
+  }
   double height = writeProcessHeights(
       wfp, 0, width, length, nullptr, height_base, height_ceiling);
   if (overMet <= 0) {
@@ -1435,6 +1442,10 @@ void extMasterConductor::writeWire3D(FILE* fp,
                                      double height_offset,
                                      double volt)
 {
+  if (fp == nullptr) {
+    return;
+  }
+
   writeWireName(fp, wireNum);
 
   double X2 = X + width;
@@ -1452,6 +1463,9 @@ void extMasterConductor::writeDiel(FILE* fp,
                                    double epsilon,
                                    double height_offset)
 {
+  if (fp == nullptr) {
+    return;
+  }
   fprintf(fp, "DIELECTRIC %s ", name);
 
   writePointXY(
