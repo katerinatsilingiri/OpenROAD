@@ -137,6 +137,7 @@ tcl_encode(
     name = "tcl",
     srcs = [
         "src/OpenRCX.tcl",
+        "src/OpenRCX_process.tcl",
     ],
     char_array_name = "rcx_tcl_inits",
     namespace = "rcx",
