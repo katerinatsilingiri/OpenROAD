@@ -15,6 +15,7 @@
 
 #include "parse.h"
 #include "rcx/extModelGen.h"
+#include "rcx/extPex25dWriter.h"
 #include "rcx/extprocess.h"
 #include "utl/Logger.h"
 
@@ -92,6 +93,7 @@ void extSolverGen::init()
   _writeUf
       = true;  // default to true, can be set to false in gen_solver_patterns
   _writePex25d = false;
+  _pexRec = nullptr;
 
   _readCapLog = false;
   _commentFlag = false;
@@ -423,6 +425,13 @@ bool extSolverGen::measurePatternVar_3D(int met,
     return false;  // should be an exception!! and return!
   }
 
+  Pex25dPattern pex_pattern;
+  _pexRec = _writePex25d ? &pex_pattern : nullptr;
+  if (_pexRec != nullptr) {
+    pex_pattern.name = _wireDirName;
+    pex_pattern.process = _topDir;
+  }
+
   double maxHeight = adjustMasterDielectricsForHeight(met, thicknessChange);
   maxHeight *= 1.2;
 
@@ -501,6 +510,15 @@ bool extSolverGen::measurePatternVar_3D(int met,
     fprintf(_filesFP, "%s/wires\n", _wireDirName);
 
     fclose(wfp);
+  }
+
+  if (_pexRec != nullptr) {
+    const std::string pex_path = std::string(_wireDirName) + "/wires.pex25d";
+    if (Pex25dWriter(logger_).write(pex_path, pex_pattern)) {
+      fprintf(_filesFP, "%s\n", pex_path.c_str());
+    }
+    // pex_pattern goes out of scope on return.
+    _pexRec = nullptr;
   }
 
   return true;

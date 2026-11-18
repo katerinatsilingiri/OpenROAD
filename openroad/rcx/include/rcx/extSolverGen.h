@@ -13,6 +13,7 @@
 namespace rcx {
 
 class extProcess;
+struct Pex25dPattern;
 
 class extSolverGen : public extProcess
 {
@@ -146,6 +147,8 @@ class extSolverGen : public extProcess
   bool _writeFiles;
   bool _writeUf;
   bool _writePex25d;
+  // Points to the pattern being recorded for PEX25D output, or nullptr.
+  Pex25dPattern* _pexRec;
 
   bool _readCapLog;
   char _commentLine[10000];
