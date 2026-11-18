@@ -144,7 +144,8 @@ class extMasterConductor
   void writeDiel(FILE* fp,
                  const char* name,
                  double epsilon,
-                 double height_offset);
+                 double height_offset,
+                 Pex25dPattern* rec = nullptr);
   void printDielHeights(FILE* fp, extDielectric* diel);
   double writeGround(FILE* fp, int met, int wire_num, double th);
 
@@ -320,7 +321,8 @@ class extProcess
                              double length,
                              char* width_name,
                              double height_base,
-                             double height_ceiling);
+                             double height_ceiling,
+                             Pex25dPattern* rec = nullptr);
   double writeProcessAndGroundPlanes(FILE* wfp,
                                      const char* gndName,
                                      int underMet,
@@ -332,7 +334,8 @@ class extProcess
                                      double W,
                                      bool apply_height_offset,
                                      double& height_ceiling,
-                                     bool diag = false);
+                                     bool diag = false,
+                                     Pex25dPattern* rec = nullptr);
 
   extProcess(uint32_t condCnt, uint32_t dielCnt, utl::Logger* logger);
 

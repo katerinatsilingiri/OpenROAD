@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -62,6 +63,15 @@ struct Pex25dPattern
                double z_hi,
                double length,
                bool focus);
+  // Sets the ground plane at the bottom of the pattern.
+  void setGround(double z_lo, double z_hi);
+  // Records the metal plane above the wires (Under and OverUnder patterns).
+  void setUpperPlane(int met, double z_lo, double z_hi);
+  // Adds one dielectric band. Bands are added bottom-up.
+  void addDielectric(const std::string& name,
+                     double epsilon,
+                     double z_lo,
+                     double z_hi);
 };
 
 // Writes a Pex25dPattern as a PEX25D text file.
@@ -73,8 +83,13 @@ class Pex25dWriter
   bool write(const std::string& path, const Pex25dPattern& pattern) const;
 
  private:
+  // Writes GROUND_PLANE, METAL (wire layers and anchors) and dielectrics.
+  void writeStack(std::ostream& out, const Pex25dPattern& pattern) const;
+  // Writes one CONDUCTOR and one BOX per wire.
+  void writeConductors(std::ostream& out, const Pex25dPattern& pattern) const;
   // Rounds v to the PEX25D grid and returns it with 3 decimals.
   std::string len(double v) const;
+
   utl::Logger* logger_;
 };
 

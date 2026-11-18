@@ -772,7 +772,8 @@ double extProcess::writeProcessHeights(FILE* fp,
                                        double length,
                                        char* width_name,
                                        double height_base,
-                                       double height_ceiling)
+                                       double height_ceiling,
+                                       Pex25dPattern* rec)
 {
   double height = 0;
   for (uint32_t jj = 1; jj < _masterDielectricTable->getCnt(); jj++) {
@@ -791,7 +792,7 @@ double extProcess::writeProcessHeights(FILE* fp,
     }
 
     // if (diel->_conformal)
-    m->writeDiel(fp, diel->_name, diel->_epsilon, height_base);
+    m->writeDiel(fp, diel->_name, diel->_epsilon, height_base, rec);
   }
   return height;
 }
@@ -931,7 +932,8 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
                                                double W,
                                                bool apply_height_offset,
                                                double& height_ceiling,
-                                               bool diag)
+                                               bool diag,
+                                               Pex25dPattern* rec)
 {
   double height_base = 0.0;
   height_ceiling = 100000;
@@ -956,6 +958,9 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
                 0.0,
                 th1);
       }
+      if (rec != nullptr) {
+        rec->setGround(-th1, 0.0);
+      }
     } else {
       a->writeGround(wfp, underMet, 0, th);
     }
@@ -966,6 +971,9 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
       } else {
         fprintf(wfp, "GROUND_PLANE 0 M0_w0  HEIGHT 0.0 0.0  THICKNESS 0.0\n");
       }
+    }
+    if (rec != nullptr && apply_height_offset) {
+      rec->setGround(-0.1, 0.0);
     }
   }
   if (overMet > 0) {
@@ -987,6 +995,9 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
                 h2 + th - height_base,
                 th);
       }
+      if (rec != nullptr) {
+        rec->setUpperPlane(overMet, h2 - height_base, h2 + th - height_base);
+      }
     } else {
       a->writeGround(wfp, overMet, 0, th);
     }
@@ -995,7 +1006,7 @@ double extProcess::writeProcessAndGroundPlanes(FILE* wfp,
     fprintf(wfp, "\n# Process Stack -- Dielectric Heights\n");
   }
   double height = writeProcessHeights(
-      wfp, 0, width, length, nullptr, height_base, height_ceiling);
+      wfp, 0, width, length, nullptr, height_base, height_ceiling, rec);
   if (overMet <= 0) {
     height_ceiling = height;
   }
@@ -1474,8 +1485,15 @@ void extMasterConductor::writeWire3D(FILE* fp,
 void extMasterConductor::writeDiel(FILE* fp,
                                    const char* name,
                                    double epsilon,
-                                   double height_offset)
+                                   double height_offset,
+                                   Pex25dPattern* rec)
 {
+  if (rec != nullptr) {
+    rec->addDielectric(name,
+                       epsilon,
+                       _loRight[2] - height_offset,
+                       _hiRight[2] - height_offset);
+  }
   if (fp == nullptr) {
     return;
   }

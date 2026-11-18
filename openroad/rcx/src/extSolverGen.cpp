@@ -467,7 +467,9 @@ bool extSolverGen::measurePatternVar_3D(int met,
                                              maxHeight,
                                              W,
                                              apply_height_offset,
-                                             height_ceiling);
+                                             height_ceiling,
+                                             false,
+                                             _pexRec);
   } else {
     height_low = writeProcessAndGroundPlanes(wfp,
                                              "GND",
@@ -479,7 +481,9 @@ bool extSolverGen::measurePatternVar_3D(int met,
                                              maxHeight,
                                              W,
                                              apply_height_offset,
-                                             height_ceiling);
+                                             height_ceiling,
+                                             false,
+                                             _pexRec);
   }
   if (_simVersion < 2) {
     height_low = 0;
