@@ -54,6 +54,12 @@ struct Pex25dPattern
   std::vector<Wire> wires;
   bool valid = true;
 
+  // UF simulation window: x range of the wires and the wire length
+  bool has_window = false;
+  double window_x_lo = 0.0;
+  double window_x_hi = 0.0;
+  double window_length = 0.0;
+
   // Adds one wire and, the first time it appears, its layer.
   void addWire(int met,
                uint32_t num,
@@ -72,6 +78,9 @@ struct Pex25dPattern
                      double epsilon,
                      double z_lo,
                      double z_hi);
+
+  // Records the window that the UF writes as WINDOW_BBOX and SIM_WIN_EXT.
+  void setWindow(double x_lo, double x_hi, double length);
 };
 
 // Writes a Pex25dPattern as a PEX25D text file.
@@ -87,6 +96,9 @@ class Pex25dWriter
   void writeStack(std::ostream& out, const Pex25dPattern& pattern) const;
   // Writes one CONDUCTOR and one BOX per wire.
   void writeConductors(std::ostream& out, const Pex25dPattern& pattern) const;
+  // Writes the DOMAIN_BOX record.
+  void writeDomain(std::ostream& out, const Pex25dPattern& pattern) const;
+
   // Rounds v to the PEX25D grid and returns it with 3 decimals.
   std::string len(double v) const;
 

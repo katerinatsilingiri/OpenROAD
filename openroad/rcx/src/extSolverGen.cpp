@@ -496,10 +496,15 @@ bool extSolverGen::measurePatternVar_3D(int met,
   double len1;
   double X1;
   double X0 = 0;
+
   if (wireCnt >= 5) {
     X0 = writeWirePatterns(wfp, height_low, len1, X1);
   } else {
     X0 = writeWirePatterns_w3(wfp, height_low, len1, X1);
+  }
+
+  if (_pexRec != nullptr) {
+    _pexRec->setWindow(X0, X1, len1);
   }
 
   if (wfp != nullptr) {
